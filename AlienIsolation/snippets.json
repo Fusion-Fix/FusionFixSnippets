@@ -1,0 +1,24 @@
+{
+  "$schema": "../schema/snippets.schema.json",
+  "game": {
+    "id": "alienisolation",
+    "title": "Alien: Isolation",
+    "exe": ["AI.exe"],
+    "arch": "win32",
+    "loader": "winmm.dll",
+    "steamAppId": 214490
+  },
+  "snippets": [
+    {
+      "id": "AlienIsolation.SkipSaveConfirmationDialog",
+      "file": "SkipSaveConfirmationDialog.cxx",
+      "title": "Skip save confirmation",
+      "description": "Saves the game without asking for confirmation first.",
+      "folder": "scripts",
+      "loader": "10.0.1",
+      "author": "ThirteenAG",
+      "source": "https://github.com/ThirteenAG/AlienIsolation.SkipSaveConfirmationDialog",
+      "default": true
+    }
+  ]
+}

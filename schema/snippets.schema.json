@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Fusion-Fix/FusionFixSnippets/schema/snippets.schema.json",
+  "title": "A game's snippets",
+  "description": "<Game>/snippets.json: the game and its .cxx snippets. tools/catalog.py checks the rules a schema can't (the folder name, files, unique ids).",
+  "type": "object",
+  "required": ["game", "snippets"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "game": {
+      "type": "object",
+      "required": ["id", "title", "exe", "arch", "loader"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The game's id on fusionfix.io (the page /games/<id>/): the folder's name in lower case.",
+          "type": "string",
+          "pattern": "^[a-z0-9]{2,40}$"
+        },
+        "title": { "description": "The game's name as players know it.", "type": "string", "minLength": 1, "maxLength": 120 },
+        "exe": {
+          "description": "File names of the game's exe.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[^\\\\/:*?\"<>|]{1,120}\\.exe$" }
+        },
+        "arch": { "description": "The exe's architecture.", "enum": ["win32", "x64"] },
+        "loader": {
+          "description": "The file name Ultimate ASI Loader gets in this game (one of loader.json names).",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_]+\\.dll$"
+        },
+        "exeFolder": {
+          "description": "Where the exe is, relative to the game's install folder, when it isn't there itself (Gameface/Binaries/Win64). The loader and the snippets go there.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9 ._-]+(/[A-Za-z0-9 ._-]+)*$"
+        },
+        "steamAppId": { "description": "The game's Steam app id.", "type": "integer", "minimum": 1 }
+      }
+    },
+    "snippets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "file", "title", "description", "folder", "loader", "author"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "<Folder>.<file name without .cxx>. Never reused for another snippet: share links and installs refer to it.",
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]+\\.[A-Za-z0-9_-]+$"
+          },
+          "file": { "description": "The .cxx file next to this one.", "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,79}\\.cxx$" },
+          "title": { "description": "A short name, shown as the snippet's switch.", "type": "string", "minLength": 1, "maxLength": 60 },
+          "description": { "description": "What it does, in one plain sentence.", "type": "string", "minLength": 1, "maxLength": 240 },
+          "folder": { "description": "Where it goes, relative to the exe's folder: scripts (the usual), plugins, or the folder itself.", "enum": ["scripts", "plugins", ""] },
+          "exe": {
+            "description": "The exes it works with, when not every exe of the game.",
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "pattern": "^[^\\\\/:*?\"<>|]{1,120}\\.exe$" }
+          },
+          "arch": { "description": "The architectures it works with, when not the game's.", "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["win32", "x64"] } },
+          "loader": { "description": "The oldest Ultimate ASI Loader version it works with (10.0.1 or later).", "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+          "author": { "description": "Who made it.", "type": "string", "minLength": 1, "maxLength": 80 },
+          "source": { "description": "Where it comes from (a plugin's repository, a forum post).", "type": "string", "pattern": "^https://" },
+          "default": { "description": "Chosen when the game's page opens.", "type": "boolean" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+name: Check snippets
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: windows-2025-vs2026
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Metadata and catalog.json
+        run: python tools/catalog.py --check
+
+      - name: Checkout Ultimate ASI Loader
+        uses: actions/checkout@v7
+        with:
+          repository: ThirteenAG/Ultimate-ASI-Loader
+          path: .ual
+          submodules: recursive
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@main
+
+      - name: Build the snippet compiler
+        working-directory: .ual
+        run: |
+          ./premake5 vs2026
+          msbuild build/cxxsnippets.vcxproj /m /p:Configuration=Release /p:Platform=Win32
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          msbuild build/cxxsnippets.vcxproj /m /p:Configuration=Release /p:Platform=x64
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Developer prompt (32-bit)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+
+      - name: cxxcheck (32-bit)
+        shell: cmd
+        run: cl /nologo /std:c++latest /EHsc /O2 /MT /utf-8 /I .ual\source\loader\cxx\cxxsnippets tools\cxxcheck\cxxcheck.cpp /Fe:cxxcheck32.exe /link /LIBPATH:.ual\build\lib\Win32\Release cxxsnippets.lib psapi.lib user32.lib
+
+      - name: Developer prompt (64-bit)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: cxxcheck (64-bit)
+        shell: cmd
+        run: cl /nologo /std:c++latest /EHsc /O2 /MT /utf-8 /I .ual\source\loader\cxx\cxxsnippets tools\cxxcheck\cxxcheck.cpp /Fe:cxxcheck64.exe /link /LIBPATH:.ual\build\lib\x64\Release cxxsnippets.lib psapi.lib user32.lib
+
+      - name: Compile every snippet
+        env:
+          CXXCHECK32: cxxcheck32.exe
+          CXXCHECK64: cxxcheck64.exe
+        run: python tools/catalog.py --check --compile

@@ -1,0 +1,17 @@
+{
+  "name": "Ultimate ASI Loader",
+  "repo": "ThirteenAG/Ultimate-ASI-Loader",
+  "tag": "latest",
+  "assets": {
+    "win32": "Ultimate-ASI-Loader-NoPDB.zip",
+    "x64": "Ultimate-ASI-Loader-NoPDB_x64.zip"
+  },
+  "file": "dinput8.dll",
+  "snippetsSince": "10.0.1",
+  "names": [
+    "dinput8.dll", "dinput.dll", "d3d8.dll", "d3d9.dll", "d3d10.dll", "d3d11.dll", "d3d12.dll", "dxgi.dll", "ddraw.dll",
+    "winmm.dll", "version.dll", "wininet.dll", "winhttp.dll", "dsound.dll", "xinput1_1.dll", "xinput1_2.dll",
+    "xinput1_3.dll", "xinput1_4.dll", "xinput9_1_0.dll", "xinputuap.dll", "binkw32.dll", "binkw64.dll", "bink2w64.dll",
+    "vorbisfile.dll", "msacm32.dll", "msvfw32.dll", "dbghelp.dll", "xlive.dll", "wintrust.dll", "dsetup.dll"
+  ]
+}

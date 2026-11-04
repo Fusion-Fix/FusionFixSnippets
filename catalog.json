@@ -1,0 +1,84 @@
+{
+  "format": 1,
+  "repo": "Fusion-Fix/FusionFixSnippets",
+  "loader": {
+    "name": "Ultimate ASI Loader",
+    "repo": "ThirteenAG/Ultimate-ASI-Loader",
+    "tag": "latest",
+    "assets": {
+      "win32": "Ultimate-ASI-Loader-NoPDB.zip",
+      "x64": "Ultimate-ASI-Loader-NoPDB_x64.zip"
+    },
+    "file": "dinput8.dll",
+    "snippetsSince": "10.0.1",
+    "names": [
+      "dinput8.dll",
+      "dinput.dll",
+      "d3d8.dll",
+      "d3d9.dll",
+      "d3d10.dll",
+      "d3d11.dll",
+      "d3d12.dll",
+      "dxgi.dll",
+      "ddraw.dll",
+      "winmm.dll",
+      "version.dll",
+      "wininet.dll",
+      "winhttp.dll",
+      "dsound.dll",
+      "xinput1_1.dll",
+      "xinput1_2.dll",
+      "xinput1_3.dll",
+      "xinput1_4.dll",
+      "xinput9_1_0.dll",
+      "xinputuap.dll",
+      "binkw32.dll",
+      "binkw64.dll",
+      "bink2w64.dll",
+      "vorbisfile.dll",
+      "msacm32.dll",
+      "msvfw32.dll",
+      "dbghelp.dll",
+      "xlive.dll",
+      "wintrust.dll",
+      "dsetup.dll"
+    ]
+  },
+  "games": {
+    "alienisolation": {
+      "folder": "AlienIsolation",
+      "title": "Alien: Isolation",
+      "exe": [
+        "AI.exe"
+      ],
+      "arch": "win32",
+      "loader": "winmm.dll",
+      "exeFolder": "",
+      "steamAppId": 214490,
+      "snippets": [
+        {
+          "id": "AlienIsolation.SkipSaveConfirmationDialog",
+          "title": "Skip save confirmation",
+          "description": "Saves the game without asking for confirmation first.",
+          "file": "SkipSaveConfirmationDialog.cxx",
+          "folder": "scripts",
+          "path": "scripts/SkipSaveConfirmationDialog.cxx",
+          "exe": [
+            "AI.exe"
+          ],
+          "arch": [
+            "win32"
+          ],
+          "loader": "10.0.1",
+          "author": "ThirteenAG",
+          "source": "https://github.com/ThirteenAG/AlienIsolation.SkipSaveConfirmationDialog",
+          "default": true,
+          "url": "https://github.com/Fusion-Fix/FusionFixSnippets/blob/main/AlienIsolation/SkipSaveConfirmationDialog.cxx",
+          "size": 401,
+          "sha256": "576241ebff84f91fa0c9701c49f8907007c75f0cbcd4b509ccc99276cc28629f",
+          "text": "// Alien: Isolation: skip the save confirmation dialog\n// Install: scripts\\SkipSaveConfirmationDialog.cxx, with Ultimate ASI Loader 10.0.1 or newer as winmm.dll.\n#include <injector/injector.hpp>\n#include <Hooking.Patterns.h>\n\nvoid Init()\n{\n    // The conditional jump in front of the dialog, made unconditional\n    injector::WriteMemory<uint8_t>(hook::get_pattern(\"74 10 53 53 6A 1B\"), 0xEB, true);\n}\n"
+        }
+      ]
+    }
+  }
+}
