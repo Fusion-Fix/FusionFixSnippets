@@ -79,6 +79,40 @@
           "text": "// Alien: Isolation: skip the save confirmation dialog\n// Install: scripts\\SkipSaveConfirmationDialog.cxx, with Ultimate ASI Loader 10.0.1 or newer as winmm.dll.\n#include <injector/injector.hpp>\n#include <Hooking.Patterns.h>\n\nvoid Init()\n{\n    // The conditional jump in front of the dialog, made unconditional\n    injector::WriteMemory<uint8_t>(hook::get_pattern(\"74 10 53 53 6A 1B\"), 0xEB, true);\n}\n"
         }
       ]
+    },
+    "deadrising2": {
+      "folder": "DeadRising2",
+      "title": "Dead Rising 2",
+      "exe": [
+        "deadrising2.exe"
+      ],
+      "arch": "win32",
+      "loader": "dinput8.dll",
+      "exeFolder": "",
+      "steamAppId": 45740,
+      "snippets": [
+        {
+          "id": "DeadRising2.LooseFileLimit",
+          "title": "No crash with many unpacked files",
+          "description": "Fixes the crash at startup when the data or update folder holds more than 2048 unpacked files.",
+          "file": "LooseFileLimit.cxx",
+          "folder": "scripts",
+          "path": "scripts/LooseFileLimit.cxx",
+          "exe": [
+            "deadrising2.exe"
+          ],
+          "arch": [
+            "win32"
+          ],
+          "loader": "10.0.1",
+          "author": "ThirteenAG",
+          "default": true,
+          "url": "https://github.com/Fusion-Fix/FusionFixSnippets/blob/main/DeadRising2/LooseFileLimit.cxx",
+          "size": 3162,
+          "sha256": "39bae5ddd3577399af80162e238bbd6711093b3332494533912992567b59e407",
+          "text": "// Dead Rising 2: no startup crash with many unpacked files\n// At startup the game lists every loose file below data\\ in a table made for 2048 files. With more files (unpacked\n// archives, or an update\\ folder, which Ultimate ASI Loader 10 shows inside data\\) it writes past the end of the\n// table and crashes. This makes the table grow as needed, so every file stays listed.\n// Made for deadrising2.exe from Steam; with another exe the loader reports a missing pattern and nothing changes.\n// Install: scripts\\LooseFileLimit.cxx, with Ultimate ASI Loader 10.0.1 or newer as dinput8.dll.\n#include <cstdint>\n#include <cstring>\n#include <safetyhook.hpp>\n#include <Hooking.Patterns.h>\n\nstruct FileInfo\n{\n    uint32_t hash;\n    uint32_t size;\n    uint32_t writeTimeLow;\n    uint32_t writeTimeHigh;\n};\n\nstruct FileIndex\n{\n    uint32_t hash;\n    int32_t info;\n};\n\n// The game's file info cache: the file list and a sorted index into it\nstruct FileInfoCache\n{\n    FileInfo* infos;     // +0x00\n    int32_t numInfos;    // +0x04\n    int32_t maxInfos;    // +0x08\n    int32_t numIndex;    // +0x0C\n    int32_t maxIndex;    // +0x10\n    uint8_t indexSorted; // +0x14\n    FileIndex* index;    // +0x18\n};\nstatic_assert(sizeof(FileInfoCache) == 0x1C, \"FileInfoCache\");\n\n// Both are __thiscall methods of the cache\ntypedef FileInfoCache*(__fastcall* Create_t)(FileInfoCache* self, void* edx, uint32_t maxInfos);\ntypedef void(__fastcall* Release_t)(FileInfoCache* self, void* edx);\n\nCreate_t createCache = nullptr;\nRelease_t releaseCache = nullptr;\nSafetyHookMid overflowHook{};\n\nuintptr_t FollowCall(void* call)\n{\n    return (uintptr_t)call + 5 + *(int32_t*)((uintptr_t)call + 1);\n}\n\n// Moves the lists into arrays twice the size, made and freed by the game's own allocator\nvoid Grow(FileInfoCache* cache)\n{\n    FileInfoCache bigger{};\n    createCache(&bigger, nullptr, (uint32_t)cache->maxInfos * 2);\n    if (!bigger.infos || !bigger.index)\n    {\n        releaseCache(&bigger, nullptr);\n        return;\n    }\n\n    memcpy(bigger.infos, cache->infos, (size_t)cache->numInfos * sizeof(FileInfo));\n    memcpy(bigger.index, cache->index, (size_t)cache->numIndex * sizeof(FileIndex));\n\n    FileInfoCache old = *cache;\n    cache->infos = bigger.infos;\n    cache->maxInfos = bigger.maxInfos;\n    cache->index = bigger.index;\n    cache->maxIndex = bigger.maxIndex;\n    releaseCache(&old, nullptr);\n}\n\nvoid Init()\n{\n    // The cache's constructor allocates both lists for a given number of files\n    createCache = (Create_t)hook::get_pattern(\"53 55 56 57 8B 7C 24 14 8B F1 33 DB 33 C9 8B C7 BA 10 00 00 00 F7 E2\");\n\n    // Shutdown releases the cache's lists before freeing the cache itself\n    releaseCache = (Release_t)FollowCall(hook::get_pattern(\"8B 0D ? ? ? ? 3B CF 89 3D ? ? ? ? 74 ? 56 8B F1 E8\", 19));\n\n    // The full-list check (mNumActiveFileInfos < mMaxFileInfos) before each file is added: grow instead\n    overflowHook = safetyhook::create_mid(hook::get_pattern(\"8B 56 04 3B 56 08 7C ? 38 1D\"), [](SafetyHookContext& regs)\n    {\n        FileInfoCache* cache = (FileInfoCache*)regs.esi;\n        if (cache->numInfos >= cache->maxInfos)\n            Grow(cache);\n    });\n}\n"
+        }
+      ]
     }
   }
 }

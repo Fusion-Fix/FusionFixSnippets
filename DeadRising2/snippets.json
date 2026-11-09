@@ -1,0 +1,23 @@
+{
+  "$schema": "../schema/snippets.schema.json",
+  "game": {
+    "id": "deadrising2",
+    "title": "Dead Rising 2",
+    "exe": ["deadrising2.exe"],
+    "arch": "win32",
+    "loader": "dinput8.dll",
+    "steamAppId": 45740
+  },
+  "snippets": [
+    {
+      "id": "DeadRising2.LooseFileLimit",
+      "file": "LooseFileLimit.cxx",
+      "title": "No crash with many unpacked files",
+      "description": "Fixes the crash at startup when the data or update folder holds more than 2048 unpacked files.",
+      "folder": "scripts",
+      "loader": "10.0.1",
+      "author": "ThirteenAG",
+      "default": true
+    }
+  ]
+}
